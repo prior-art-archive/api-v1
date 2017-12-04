@@ -7,7 +7,7 @@ import cors from 'cors';
 import compression from 'compression';
 import passport from 'passport';
 
-import { sequelize, User } from './models';
+import { sequelize, Organization } from './models';
 
 /* -------------------------------- */
 /* Initialize development variables */
@@ -78,10 +78,10 @@ app.use(cors(corsOptions));
 /* ------------------- */
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(User.createStrategy());
+passport.use(Organization.createStrategy());
 // Use static serialize and deserialize of model for passport session support
-passport.serializeUser(User.serializeUser());
-passport.deserializeUser(User.deserializeUser());
+passport.serializeUser(Organization.serializeUser());
+passport.deserializeUser(Organization.deserializeUser());
 /* -------------------- */
 /* -------------------- */
 
