@@ -22,11 +22,12 @@ app.post('/uploads', (req, res)=> {
 		console.log('In then 1');
 		if (!organizationData) { throw new Error('organizationSlug not valid'); }
 
+		const dateString = req.body.pushdate || req.body.date || req.body.uploaddate;
 		const formattedMetadata = {
 			url: req.body.url,
 			title: req.body.title,
 			description: req.body.description,
-			datePublished: req.body.pushdate || req.body.date || req.body.uploaddate,
+			datePublished: Date.parse(dateString) ? new Date(dateString) : undefined,
 			organizationId: organizationData.id,
 			organizationName: organizationData.name,
 			// fileId: Comes from underlay
