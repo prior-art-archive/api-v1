@@ -64,6 +64,7 @@ app.post('/uploads', (req, res)=> {
 		console.log('Underlay response is', JSON.stringify(underlayResponse, null, 2));
 		const underlayMetadata = {
 			...newUploadData.formattedMetadata,
+			url: underlayResponse[0].url,
 			fileId: underlayResponse[0].identifier,
 			dateUploaded: underlayResponse[0].assertionDate
 		};
