@@ -9,6 +9,7 @@ app.post('/uploads', (req, res)=> {
 	// Post to underlay
 	// Update with formattedmetdata
 	// When received post to kafka
+	console.time('uploadsRunTime');
 	Organization.findOne({
 		where: {
 			slug: req.body.organizationSlug
@@ -54,11 +55,11 @@ app.post('/uploads', (req, res)=> {
 		console.log('Underlay response is', JSON.stringify(underlayResponse, null, 2));
 		const underlayMetadata = {
 			...newUploadData.formattedMetadata,
-			fileId: underlayResponse.identifier,
-			dateUploaded: underlayResponse.assertionDate
+			fileId: underlayResponse[0].identifier,
+			dateUploaded: underlayResponse[0].assertionDate
 		};
 		console.log('In then 3a');
-		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata}, {
+		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				id: newUploadData.id
 			}
@@ -69,6 +70,7 @@ app.post('/uploads', (req, res)=> {
 	.then(([underlayMetadata])=> {
 		console.log('In then 4');
 		console.log('Lets send this to kafka!', underlayMetadata);
+		console.timeEnd('uploadsRunTime');
 		return res.status(201).json('Success');
 	})
 	.catch((error)=> {
