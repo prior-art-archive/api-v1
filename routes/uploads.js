@@ -25,8 +25,10 @@ app.post('/uploads', (req, res)=> {
 		const formattedMetadata = {
 			url: req.body.url,
 			title: req.body.title,
+			description: req.body.description,
+			datePublished: req.body.pushdate || req.body.date || req.body.uploaddate,
 			organizationId: organizationData.id,
-			organizationName: organizationData.name
+			organizationName: organizationData.name,
 			// fileId: Comes from underlay
 			// dateUploaded: Comes from underlay
 		};
@@ -41,6 +43,8 @@ app.post('/uploads', (req, res)=> {
 		const assertion = [{
 			type: 'CreativeWork',
 			name: newUploadData.formattedMetadata.title,
+			description: newUploadData.formattedMetadata.description,
+			datePublished: newUploadData.formattedMetadata.datePublished,
 			author: [newUploadData.organizationId]
 		}];
 		console.log('In then 2b');
