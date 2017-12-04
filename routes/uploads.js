@@ -28,8 +28,8 @@ app.post('/uploads', (req, res)=> {
 			title: req.body.title,
 			description: req.body.description,
 			datePublished: Date.parse(dateString) ? new Date(dateString) : undefined,
-			organizationId: organizationData.id,
-			organizationName: organizationData.name,
+			companyId: organizationData.id,
+			companyName: organizationData.name,
 			// fileId: Comes from underlay
 			// dateUploaded: Comes from underlay
 		};
