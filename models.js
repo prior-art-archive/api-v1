@@ -25,8 +25,10 @@ const id = {
 
 const Upload = sequelize.define('Upload', {
 	id: id,
-	metadata: { type: Sequelize.JSONB },
-	organizationId: { type: Sequelize.UUID, allowNull: false },
+	rawMetadata: { type: Sequelize.JSONB },
+	formattedMetadata: { type: Sequelize.JSONB },
+	underlayMetadata: { type: Sequelize.JSONB },
+	organizationId: { type: Sequelize.UUID },
 });
 
 const Organization = sequelize.define('Organization', {
@@ -60,7 +62,7 @@ const Organization = sequelize.define('Organization', {
 });
 
 passportLocalSequelize.attachToUser(Organization, {
-	usernameField: 'email',
+	usernameField: 'slug',
 	hashField: 'hash',
 	saltField: 'salt',
 	digest: 'sha1',

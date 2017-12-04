@@ -1,7 +1,78 @@
+import request from 'request-promise';
 import app from '../server';
-// import { Upload, Organization } from '../models';
+import { Upload, Organization } from '../models';
 
 app.post('/uploads', (req, res)=> {
 	console.log('In uploads', req.body);
-	return res.status(201).json(req.body);
+	// Check for the id of org
+	// Store the raw object
+	// Post to underlay
+	// Update with formattedmetdata
+	// When received post to kafka
+	Organization.findOne({
+		where: {
+			slug: req.body.organizationSlug
+		}
+	})
+	.then((organizationData)=> {
+		console.log('In then 1');
+		if (!organizationData) { throw new Error('organizationSlug not valid'); }
+
+		const formattedMetadata = {
+			url: req.body.url,
+			title: req.body.title,
+			organizationId: organizationData.id,
+			organizationName: organizationData.name
+			// fileId: Comes from underlay
+			// dateUploaded: Comes from underlay
+		};
+		return Upload.create({
+			rawMetadata: req.body,
+			formattedMetadata: formattedMetadata,
+			organizationId: organizationData.id,
+		});
+	})
+	.then((newUploadData)=> {
+		console.log('In then 2');
+		const assertion = [{
+			type: 'CreativeWork',
+			name: newUploadData.formattedMetadata.title,
+			author: [newUploadData.organizationId]
+		}];
+		console.log('In then 2b');
+		const options = {
+			method: 'POST',
+			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
+			body: assertion,
+			json: true
+		};
+		console.log('In then 2c');
+		return Promise.all([request(options), newUploadData]);
+	})
+	.then(([underlayResponse, newUploadData])=> {
+		console.log('In then 3');
+		console.log('Underlay response is', JSON.stringify(underlayResponse, null, 2));
+		const underlayMetadata = {
+			...newUploadData.formattedMetadata,
+			fileId: underlayResponse.identifier,
+			dateUploaded: underlayResponse.assertionDate
+		};
+		console.log('In then 3a');
+		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata}, {
+			where: {
+				id: newUploadData.id
+			}
+		});
+		console.log('In then 3b');
+		return Promise.all([underlayMetadata, updateMetadata]);
+	})
+	.then(([underlayMetadata])=> {
+		console.log('In then 4');
+		console.log('Lets send this to kafka!', underlayMetadata);
+		return res.status(201).json('Success');
+	})
+	.catch((error)=> {
+		console.log('Error in uploads', error, req.body);
+		return res.status(400).json('Error in uploads');
+	});
 });
