@@ -1,0 +1,3 @@
+process.env.DATABASE_URL = '<DATABASE_URL>';
+process.env.AWS_ACCESS_KEY_ID = '<AWS_ACCESS_KEY_ID>';
+process.env.AWS_SECRET_ACCESS_KEY = '<AWS_SECRET_ACCESS_KEY>';
