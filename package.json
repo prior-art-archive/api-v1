@@ -41,6 +41,7 @@
     "express": "^4.14.0",
     "express-session": "^1.14.1",
     "newrelic": "^2.2.0",
+    "no-kafka": "^3.2.8",
     "nodemon": "^1.11.0",
     "passport": "^0.4.0",
     "passport-local": "^1.0.0",

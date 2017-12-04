@@ -1,6 +1,9 @@
 import request from 'request-promise';
+import Kafka from 'no-kafka';
 import app from '../server';
 import { Upload, Organization } from '../models';
+
+const producer = new Kafka.Producer();
 
 app.post('/uploads', (req, res)=> {
 	console.log('In uploads', req.body);
@@ -70,6 +73,17 @@ app.post('/uploads', (req, res)=> {
 	.then(([underlayMetadata])=> {
 		console.log('In then 4');
 		console.log('Lets send this to kafka!', underlayMetadata);
+		return producer.init().then(()=> {
+			return producer.send({
+				topic: 'uspto',
+				partition: 0,
+				message: underlayMetadata
+			});
+		});
+	})
+	.then((kafkaResult)=> {
+		console.log('In then 5');
+		console.log('Got kafka result: ', kafkaResult);
 		console.timeEnd('uploadsRunTime');
 		return res.status(201).json('Success');
 	})
