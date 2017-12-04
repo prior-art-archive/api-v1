@@ -61,7 +61,7 @@ const whitelist = [
 
 const corsOptions = {
 	origin: function (origin, callback) {
-		// This assumes the browser implements CORS. 
+		// This assumes the browser implements CORS.
 		// origin being undefined means the request is made on a local route
 		// const originIsWhitelisted = whitelist.indexOf(origin) !== -1 || origin === undefined;
 		const originIsWhitelisted = true;
