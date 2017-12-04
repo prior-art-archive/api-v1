@@ -43,6 +43,7 @@ app.post('/uploads', (req, res)=> {
 		console.log('In then 2');
 		const assertion = [{
 			type: 'CreativeWork',
+			url: newUploadData.formattedMetadata.url,
 			name: newUploadData.formattedMetadata.title,
 			description: newUploadData.formattedMetadata.description,
 			datePublished: newUploadData.formattedMetadata.datePublished,
