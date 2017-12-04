@@ -75,7 +75,7 @@ app.post('/uploads', (req, res)=> {
 		console.log('Lets send this to kafka!', underlayMetadata);
 		return producer.init().then(()=> {
 			return producer.send({
-				topic: 'uspto',
+				topic: 'tennessee-18188.uspto',
 				partition: 0,
 				message: underlayMetadata
 			});
