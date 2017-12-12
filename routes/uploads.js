@@ -84,7 +84,9 @@ app.post('/uploads', (req, res)=> {
 			return producer.send({
 				topic: 'tennessee-18188.uspto',
 				partition: 0,
-				message: underlayMetadata
+				message: {
+					value: underlayMetadata
+				}
 			});
 		});
 	})
