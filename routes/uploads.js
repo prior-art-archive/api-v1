@@ -85,7 +85,7 @@ app.post('/uploads', (req, res)=> {
 				topic: 'tennessee-18188.uspto',
 				partition: 0,
 				message: {
-					value: underlayMetadata
+					value: JSON.stringify(underlayMetadata)
 				}
 			});
 		});
