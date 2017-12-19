@@ -105,7 +105,7 @@ app.use((err, req, res, next)=> {
 /* ------------------- */
 require('./routes/login.js');
 require('./routes/logout.js');
-require('./routes/organizations.js')
+require('./routes/organizations.js');
 require('./routes/uploadPolicy.js');
 require('./routes/uploads.js');
 

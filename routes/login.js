@@ -2,7 +2,11 @@ import passport from 'passport';
 import app from '../server';
 
 function login(req, res) {
-	const user = req.user || {};
+	const user = req.user ? req.user.toJSON() : {};
+	delete user.hash;
+	delete user.salt;
+	delete user.createdAt;
+	delete user.updatedAt;
 	return res.status(201).json(user);
 }
 
