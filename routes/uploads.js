@@ -125,6 +125,25 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 	})
 	.then((kafkaResult)=> {
 		console.log('Here 7: kafkaResult', kafkaResult);
+		const options = {
+			method: 'POST',
+			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
+			body: {
+				authentication: {},
+				assertions: [{
+					type: 'CreativeWork',
+					identifier: creativeWorkAssertion.identifier,
+					associatedMedia: [mediaObjectAssertion.identifier],
+				}],
+				webhookUri: ''
+			},
+			json: true
+		};
+		console.log('Here 8: options', options);
+		return request(options);
+	})
+	.then(()=> {
+		console.log('Here 9: All seems good. Finishing.');
 		return res.status(201).json('Success');
 	})
 	.catch((error)=> {
