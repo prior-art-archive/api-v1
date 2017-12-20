@@ -80,11 +80,11 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		return null;
 	}
 
-	const creativeWorkAssertion = req.body.assertions.filter((prev, curr)=> {
+	const creativeWorkAssertion = req.body.assertions.reduce((prev, curr)=> {
 		if (curr.type === 'CreativeWork') { return curr; }
 		return prev;
 	}, undefined);
-	const mediaObjectAssertion = req.body.assertions.filter((prev, curr)=> {
+	const mediaObjectAssertion = req.body.assertions.reduce((prev, curr)=> {
 		if (curr.type === 'MediaObject') { return curr; }
 		return prev;
 	}, undefined);
