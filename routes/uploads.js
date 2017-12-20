@@ -5,83 +5,8 @@ import { Upload, Organization } from '../models';
 
 const producer = new Kafka.Producer();
 
-app.post('/handleUnderlayResponse', (req, res)=> {
-	if (req.body.status !== 'success') {
-		console.log('Underlay Failed', req.body);
-		return null;
-	}
-
-	const creativeWorkAssertion = req.body.assertions.filter((prev, curr)=> {
-		if (curr.type === 'CreativeWork') { return curr; }
-		return prev;
-	}, undefined);
-	const mediaObjectAssertion = req.body.assertions.filter((prev, curr)=> {
-		if (curr.type === 'MediaObject') { return curr; }
-		return prev;
-	}, undefined);
-
-
-	Upload.findOne({
-		where: {
-			requestId: req.body.requestId
-		}
-	})
-	.then((uploadObject)=> {
-		const formattedMetadata = uploadObject.toJSON().formattedMetadata;
-		const underlayMetadata = {
-			...formattedMetadata,
-			url: mediaObjectAssertion.url,
-			fileId: creativeWorkAssertion.identifier,
-			dateUploaded: creativeWorkAssertion.assertionDate
-		};
-		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
-			where: {
-				requestId: req.body.requestId
-			}
-		});
-		return Promise.all([underlayMetadata, updateMetadata]);
-	})
-	// .then(([underlayResponse, newUploadData])=> {
-	// 	const underlayMetadata = {
-	// 		...newUploadData.formattedMetadata,
-	// 		url: underlayResponse[0].url,
-	// 		fileId: underlayResponse[0].identifier,
-	// 		dateUploaded: underlayResponse[0].assertionDate
-	// 	};
-	// 	const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
-	// 		where: {
-	// 			id: newUploadData.id
-	// 		}
-	// 	});
-	// 	return Promise.all([underlayMetadata, updateMetadata]);
-	// })
-	.then(([underlayMetadata])=> {
-		return producer.init().then(()=> {
-			return producer.send({
-				topic: 'tennessee-18188.uspto',
-				partition: 0,
-				message: {
-					value: JSON.stringify([underlayMetadata])
-				}
-			});
-		});
-	})
-	.then(()=> {
-		return res.status(201).json('Success');
-	})
-	.catch((error)=> {
-		console.log('Error in uploads', error, req.body);
-		return res.status(400).json('Error in uploads');
-	});
-});
-
 app.post('/uploads', (req, res)=> {
 	console.log('In uploads', req.body);
-	// Check for the id of org
-	// Store the raw object
-	// Post to underlay
-	// Update with formattedmetdata
-	// When received post to kafka
 	Organization.findOne({
 		where: {
 			slug: req.body.organizationSlug
@@ -101,6 +26,7 @@ app.post('/uploads', (req, res)=> {
 			// fileId: Comes from underlay
 			// dateUploaded: Comes from underlay
 		};
+		console.log('Here 1: formattedMetadata', formattedMetadata);
 		const assertions = [
 			{
 				type: 'CreativeWork',
@@ -115,6 +41,7 @@ app.post('/uploads', (req, res)=> {
 				datePublished: formattedMetadata.datePublished,
 			}
 		];
+		console.log('Here 2: assertions', assertions);
 		const options = {
 			method: 'POST',
 			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
@@ -129,6 +56,7 @@ app.post('/uploads', (req, res)=> {
 		return Promise.all([request(options), formattedMetadata]);
 	})
 	.then(([underlayResponse, formattedMetadata])=> {
+		console.log('Here 3: underlayResponse', underlayResponse);
 		return Upload.create({
 			rawMetadata: req.body,
 			formattedMetadata: formattedMetadata,
@@ -143,58 +71,64 @@ app.post('/uploads', (req, res)=> {
 		console.log('Error in uploads', error, req.body);
 		return res.status(400).json('Error in uploads');
 	});
-		// const assertion = [
-		// 	{
-		// 		type: 'CreativeWork',
-		// 		name: newUploadData.formattedMetadata.title,
-		// 		description: newUploadData.formattedMetadata.description,
-		// 		datePublished: newUploadData.formattedMetadata.datePublished,
-		// 		author: [newUploadData.organizationId]
-		// 	},
-		// 	{
-		// 		type: 'MediaObject',
-		// 		contentUrl: newUploadData.formattedMetadata.url,
-		// 		datePublished: newUploadData.formattedMetadata.datePublished,
-		// 	}
-		// ];
-		// const options = {
-		// 	method: 'POST',
-		// 	uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
-		// 	body: assertion,
-		// 	json: true
-		// };
-		// return Promise.all([request(options), newUploadData]);
-	// })
-	// .then(([underlayResponse, newUploadData])=> {
-	// 	const underlayMetadata = {
-	// 		...newUploadData.formattedMetadata,
-	// 		url: underlayResponse[0].url,
-	// 		fileId: underlayResponse[0].identifier,
-	// 		dateUploaded: underlayResponse[0].assertionDate
-	// 	};
-	// 	const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
-	// 		where: {
-	// 			id: newUploadData.id
-	// 		}
-	// 	});
-	// 	return Promise.all([underlayMetadata, updateMetadata]);
-	// })
-	// .then(([underlayMetadata])=> {
-	// 	return producer.init().then(()=> {
-	// 		return producer.send({
-	// 			topic: 'tennessee-18188.uspto',
-	// 			partition: 0,
-	// 			message: {
-	// 				value: JSON.stringify([underlayMetadata])
-	// 			}
-	// 		});
-	// 	});
-	// })
-	// .then((kafkaResult)=> {
-	// 	return res.status(201).json('Success');
-	// })
-	// .catch((error)=> {
-	// 	console.log('Error in uploads', error, req.body);
-	// 	return res.status(400).json('Error in uploads');
-	// });
+});
+
+app.post('/handleUnderlayResponse', (req, res)=> {
+	console.log('Here 4: handling Underlay response', req.body);
+	if (req.body.status !== 'success') {
+		console.log('Underlay Failed', req.body);
+		return null;
+	}
+
+	const creativeWorkAssertion = req.body.assertions.filter((prev, curr)=> {
+		if (curr.type === 'CreativeWork') { return curr; }
+		return prev;
+	}, undefined);
+	const mediaObjectAssertion = req.body.assertions.filter((prev, curr)=> {
+		if (curr.type === 'MediaObject') { return curr; }
+		return prev;
+	}, undefined);
+
+	console.log('Here 5: creativeWorkAssertion', creativeWorkAssertion);
+	console.log('Here 5b: mediaObjectAssertion', mediaObjectAssertion);
+	return Upload.findOne({
+		where: {
+			requestId: req.body.requestId
+		}
+	})
+	.then((uploadObject)=> {
+		const formattedMetadata = uploadObject.toJSON().formattedMetadata;
+		const underlayMetadata = {
+			...formattedMetadata,
+			url: mediaObjectAssertion.url,
+			fileId: creativeWorkAssertion.identifier,
+			dateUploaded: creativeWorkAssertion.assertionDate
+		};
+		console.log('Here 6: new underlayMetadata', underlayMetadata);
+		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
+			where: {
+				requestId: req.body.requestId
+			}
+		});
+		return Promise.all([underlayMetadata, updateMetadata]);
+	})
+	.then(([underlayMetadata])=> {
+		return producer.init().then(()=> {
+			return producer.send({
+				topic: 'tennessee-18188.uspto',
+				partition: 0,
+				message: {
+					value: JSON.stringify([underlayMetadata])
+				}
+			});
+		});
+	})
+	.then((kafkaResult)=> {
+		console.log('Here 7: kafkaResult', kafkaResult);
+		return res.status(201).json('Success');
+	})
+	.catch((error)=> {
+		console.log('Error in uploads', error, req.body);
+		return res.status(400).json('Error in uploads');
+	});
 });
