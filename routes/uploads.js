@@ -100,7 +100,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		const formattedMetadata = uploadObject.toJSON().formattedMetadata;
 		const underlayMetadata = {
 			...formattedMetadata,
-			url: mediaObjectAssertion.url,
+			url: mediaObjectAssertion.contentUrl,
 			fileId: creativeWorkAssertion.identifier,
 			dateUploaded: creativeWorkAssertion.assertionDate
 		};
