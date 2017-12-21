@@ -68,13 +68,14 @@ app.post('/uploads', (req, res)=> {
 });
 
 app.post('/handleUnderlayResponse', (req, res)=> {
+	res.status(201).json('Success');
+
 	if (req.body.status !== 'success') {
 		console.log('Underlay Failed', req.body);
 		return null;
 	}
 
 	const mediaObjectAssertion = req.body.assertions[0];
-
 	return Upload.findOne({
 		where: {
 			requestId: req.body.requestId
@@ -105,10 +106,9 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 	})
 	.then(([kafkaResult])=> {
 		console.log(`RequestId: ${req.body.requestId}, kafkaResult Success: ${!kafkaResult[0].error}`);
-		return res.status(201).json('Success');
+		// return res.status(201).json('Success');
 	})
 	.catch((error)=> {
 		console.log('Error in uploads', error, req.body);
-		return res.status(400).json('Error in uploads');
 	});
 });
