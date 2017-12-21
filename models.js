@@ -29,11 +29,10 @@ const Upload = sequelize.define('Upload', {
 	formattedMetadata: { type: Sequelize.JSONB },
 	underlayMetadata: { type: Sequelize.JSONB },
 	organizationId: { type: Sequelize.UUID },
-	requestId: { type: Sequelize.UUID },
-}, {
-	indexes: [
-		{ fields: ['requestId'], method: 'BTREE' },
-	]
+	requestId: {
+		type: Sequelize.UUID,
+		unique: true,
+	},
 });
 
 const Organization = sequelize.define('Organization', {
