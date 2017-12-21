@@ -27,16 +27,14 @@ app.post('/uploads', (req, res)=> {
 			// dateUploaded: Comes from underlay
 		};
 		// console.log('Here 1: formattedMetadata', formattedMetadata);
-		const assertions = [
-			{
-				type: 'MediaObject',
-				name: formattedMetadata.title,
-				description: formattedMetadata.description,
-				datePublished: formattedMetadata.datePublished,
-				author: [formattedMetadata.companyId],
-				contentUrl: formattedMetadata.url,
-			}
-		];
+		const assertions = [{
+			type: 'MediaObject',
+			name: formattedMetadata.title,
+			description: formattedMetadata.description,
+			datePublished: formattedMetadata.datePublished,
+			author: [formattedMetadata.companyId],
+			contentUrl: formattedMetadata.url,
+		}];
 		// console.log('Here 2: assertions', assertions);
 		const options = {
 			method: 'POST',
@@ -93,7 +91,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 			fileId: mediaObjectAssertion.identifier,
 			dateUploaded: mediaObjectAssertion.assertionDate
 		};
-		console.log('Here 6: new underlayMetadata', underlayMetadata);
+		// console.log('Here 6: new underlayMetadata', underlayMetadata);
 		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				requestId: req.body.requestId
@@ -114,24 +112,6 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 	})
 	.then((kafkaResult)=> {
 		console.log('RequestId: ', req.body.requestId, ', kafkaResult Success:', !kafkaResult[0].error);
-	// 	const options = {
-	// 		method: 'POST',
-	// 		uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
-	// 		body: {
-	// 			authentication: {},
-	// 			assertions: [{
-	// 				type: 'CreativeWork',
-	// 				identifier: creativeWorkAssertion.identifier,
-	// 				associatedMedia: [mediaObjectAssertion.identifier],
-	// 			}],
-	// 			webhookUri: ''
-	// 		},
-	// 		json: true
-	// 	};
-	// 	// console.log('Here 8: options', options);
-	// 	return request(options);
-	// })
-	// .then(()=> {
 		// console.log('Here 9: All seems good. Finishing.');
 		return res.status(201).json('Success');
 	})
