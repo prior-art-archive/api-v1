@@ -4,6 +4,10 @@ import app from '../server';
 import { Upload, Organization } from '../models';
 
 const producer = new Kafka.Producer();
+let kafkaProducer;
+producer.init().then(()=> {
+	kafkaProducer = producer;
+});
 
 app.post('/uploads', (req, res)=> {
 	// console.log('In uploads', req.body);
@@ -12,7 +16,8 @@ app.post('/uploads', (req, res)=> {
 	return Organization.findOne({
 		where: {
 			slug: req.body.organizationSlug
-		}
+		},
+		attributes: ['slug', 'id'],
 	})
 	.then((organizationData)=> {
 		console.timeEnd('findOrg');
@@ -94,7 +99,8 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 	return Upload.findOne({
 		where: {
 			requestId: req.body.requestId
-		}
+		},
+		attributes: ['requestId', 'formattedMetadata']
 	})
 	.then((uploadObject)=> {
 		console.timeEnd('findRequestFromDb');
@@ -108,30 +114,40 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		};
 		// console.log('Here 6: new underlayMetadata', underlayMetadata);
 		console.timeEnd('formatRequestData');
-		console.time('updateDb');
+		console.time('updateDbandKafka');
 		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				requestId: req.body.requestId
 			}
 		});
-		return Promise.all([underlayMetadata, updateMetadata]);
-	})
-	.then(([underlayMetadata])=> {
-		console.timeEnd('updateDb');
-		console.time('sendToKafka');
-		// This should/could be parallelized above.
-		return producer.init().then(()=> {
-			return producer.send({
-				topic: 'tennessee-18188.uspto',
-				partition: 0,
-				message: {
-					value: JSON.stringify([underlayMetadata])
-				}
-			});
+		const sendToKafka = kafkaProducer.send({
+			topic: 'tennessee-18188.uspto',
+			partition: 0,
+			message: {
+				value: JSON.stringify([underlayMetadata])
+			}
 		});
+
+		// return Promise.all([underlayMetadata, updateMetadata]);
+		return Promise.all([updateMetadata, sendToKafka]);
 	})
-	.then((kafkaResult)=> {
-		console.timeEnd('sendToKafka');
+	// .then(([underlayMetadata])=> {
+	// 	console.timeEnd('updateDb');
+	// 	console.time('sendToKafka');
+	// 	// This should/could be parallelized above.
+	// 	return producer.init().then(()=> {
+	// 		return producer.send({
+	// 			topic: 'tennessee-18188.uspto',
+	// 			partition: 0,
+	// 			message: {
+	// 				value: JSON.stringify([underlayMetadata])
+	// 			}
+	// 		});
+	// 	});
+	// })
+	.then(([updateResult, kafkaResult])=> {
+		// console.timeEnd('sendToKafka');
+		console.timeEnd('updateDbandKafka');
 		console.log('RequestId: ', req.body.requestId, ', kafkaResult Success:', !kafkaResult[0].error);
 		// console.log('Here 9: All seems good. Finishing.');
 		return res.status(201).json('Success');
