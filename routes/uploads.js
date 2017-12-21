@@ -91,7 +91,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 			fileId: mediaObjectAssertion.identifier,
 			dateUploaded: mediaObjectAssertion.assertionDate
 		};
-		// console.log('Here 6: new underlayMetadata', underlayMetadata);
+		console.log('Here 6: new underlayMetadata', underlayMetadata);
 		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				requestId: req.body.requestId
