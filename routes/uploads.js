@@ -7,14 +7,18 @@ const producer = new Kafka.Producer();
 
 app.post('/uploads', (req, res)=> {
 	// console.log('In uploads', req.body);
+	console.time('uploadsRouteTotal');
+	console.time('findOrg');
 	return Organization.findOne({
 		where: {
 			slug: req.body.organizationSlug
 		}
 	})
 	.then((organizationData)=> {
+		console.timeEnd('findOrg');
 		if (!organizationData) { throw new Error('organizationSlug not valid'); }
 
+		console.time('processUploadData');
 		const dateString = req.body.pushdate || req.body.date || req.body.uploaddate;
 		const formattedMetadata = {
 			url: req.body.url,
@@ -46,11 +50,14 @@ app.post('/uploads', (req, res)=> {
 			},
 			json: true
 		};
-
+		console.timeEnd('processUploadData');
+		console.time('sendToUnderlay');
 		return Promise.all([request(options), formattedMetadata]);
 	})
 	.then(([underlayResponse, formattedMetadata])=> {
 		// console.log('Here 3: underlayResponse', underlayResponse);
+		console.timeEnd('sendToUnderlay');
+		console.time('createUploadInDb');
 		return Upload.create({
 			rawMetadata: req.body,
 			formattedMetadata: formattedMetadata,
@@ -59,15 +66,20 @@ app.post('/uploads', (req, res)=> {
 		});
 	})
 	.then(()=> {
+		console.timeEnd('createUploadInDb');
 		return res.status(201).json('success');
 	})
 	.catch((error)=> {
 		console.log('Error in uploads', error, req.body);
 		return res.status(400).json('Error in uploads');
+	})
+	.finally(()=> {
+		console.timeEnd('uploadsRouteTotal');
 	});
 });
 
 app.post('/handleUnderlayResponse', (req, res)=> {
+	console.time('handleResponseRouteTotal');
 	// console.log('Here 4: handling Underlay response', req.body);
 	if (req.body.status !== 'success') {
 		console.log('Underlay Failed', req.body);
@@ -78,12 +90,15 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 
 	// console.log('Here 5: creativeWorkAssertion', creativeWorkAssertion);
 	// console.log('Here 5b: mediaObjectAssertion', mediaObjectAssertion);
+	console.time('findRequestFromDb');
 	return Upload.findOne({
 		where: {
 			requestId: req.body.requestId
 		}
 	})
 	.then((uploadObject)=> {
+		console.timeEnd('findRequestFromDb');
+		console.time('formatRequestData');
 		const formattedMetadata = uploadObject.toJSON().formattedMetadata;
 		const underlayMetadata = {
 			...formattedMetadata,
@@ -92,6 +107,8 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 			dateUploaded: mediaObjectAssertion.assertionDate
 		};
 		// console.log('Here 6: new underlayMetadata', underlayMetadata);
+		console.timeEnd('formatRequestData');
+		console.time('updateDb');
 		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				requestId: req.body.requestId
@@ -100,6 +117,9 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		return Promise.all([underlayMetadata, updateMetadata]);
 	})
 	.then(([underlayMetadata])=> {
+		console.timeEnd('updateDb');
+		console.time('sendToKafka');
+		// This should/could be parallelized above.
 		return producer.init().then(()=> {
 			return producer.send({
 				topic: 'tennessee-18188.uspto',
@@ -111,6 +131,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		});
 	})
 	.then((kafkaResult)=> {
+		console.timeEnd('sendToKafka');
 		console.log('RequestId: ', req.body.requestId, ', kafkaResult Success:', !kafkaResult[0].error);
 		// console.log('Here 9: All seems good. Finishing.');
 		return res.status(201).json('Success');
@@ -118,5 +139,8 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 	.catch((error)=> {
 		console.log('Error in uploads', error, req.body);
 		return res.status(400).json('Error in uploads');
+	})
+	.finally(()=> {
+		console.timeEnd('handleResponseRouteTotal');
 	});
 });
