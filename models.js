@@ -38,7 +38,7 @@ const Upload = sequelize.define('Upload', {
 const Organization = sequelize.define('Organization', {
 	id: id,
 	slug: {
-		type: Sequelize.TEXT,
+		type: Sequelize.STRING,
 		unique: true,
 		allowNull: false,
 		validate: {
