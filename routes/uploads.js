@@ -6,7 +6,7 @@ import { Upload, Organization } from '../models';
 const producer = new Kafka.Producer();
 
 app.post('/uploads', (req, res)=> {
-	console.log('In uploads', req.body);
+	// console.log('In uploads', req.body);
 	Organization.findOne({
 		where: {
 			slug: req.body.organizationSlug
@@ -26,7 +26,7 @@ app.post('/uploads', (req, res)=> {
 			// fileId: Comes from underlay
 			// dateUploaded: Comes from underlay
 		};
-		console.log('Here 1: formattedMetadata', formattedMetadata);
+		// console.log('Here 1: formattedMetadata', formattedMetadata);
 		const assertions = [
 			{
 				type: 'CreativeWork',
@@ -41,7 +41,7 @@ app.post('/uploads', (req, res)=> {
 				datePublished: formattedMetadata.datePublished,
 			}
 		];
-		console.log('Here 2: assertions', assertions);
+		// console.log('Here 2: assertions', assertions);
 		const options = {
 			method: 'POST',
 			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
@@ -56,7 +56,7 @@ app.post('/uploads', (req, res)=> {
 		return Promise.all([request(options), formattedMetadata]);
 	})
 	.then(([underlayResponse, formattedMetadata])=> {
-		console.log('Here 3: underlayResponse', underlayResponse);
+		// console.log('Here 3: underlayResponse', underlayResponse);
 		return Upload.create({
 			rawMetadata: req.body,
 			formattedMetadata: formattedMetadata,
@@ -74,7 +74,7 @@ app.post('/uploads', (req, res)=> {
 });
 
 app.post('/handleUnderlayResponse', (req, res)=> {
-	console.log('Here 4: handling Underlay response', req.body);
+	// console.log('Here 4: handling Underlay response', req.body);
 	if (req.body.status !== 'success') {
 		console.log('Underlay Failed', req.body);
 		return null;
@@ -89,8 +89,8 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		return prev;
 	}, undefined);
 
-	console.log('Here 5: creativeWorkAssertion', creativeWorkAssertion);
-	console.log('Here 5b: mediaObjectAssertion', mediaObjectAssertion);
+	// console.log('Here 5: creativeWorkAssertion', creativeWorkAssertion);
+	// console.log('Here 5b: mediaObjectAssertion', mediaObjectAssertion);
 	return Upload.findOne({
 		where: {
 			requestId: req.body.requestId
@@ -104,7 +104,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 			fileId: creativeWorkAssertion.identifier,
 			dateUploaded: creativeWorkAssertion.assertionDate
 		};
-		console.log('Here 6: new underlayMetadata', underlayMetadata);
+		// console.log('Here 6: new underlayMetadata', underlayMetadata);
 		const updateMetadata = Upload.update({ underlayMetadata: underlayMetadata }, {
 			where: {
 				requestId: req.body.requestId
@@ -124,7 +124,7 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 		});
 	})
 	.then((kafkaResult)=> {
-		console.log('Here 7: kafkaResult', kafkaResult);
+		console.log('RequestId: ', req.body.requestId, ', kafkaResult Success:', !kafkaResult[0].error);
 		const options = {
 			method: 'POST',
 			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
@@ -139,11 +139,11 @@ app.post('/handleUnderlayResponse', (req, res)=> {
 			},
 			json: true
 		};
-		console.log('Here 8: options', options);
+		// console.log('Here 8: options', options);
 		return request(options);
 	})
 	.then(()=> {
-		console.log('Here 9: All seems good. Finishing.');
+		// console.log('Here 9: All seems good. Finishing.');
 		return res.status(201).json('Success');
 	})
 	.catch((error)=> {
