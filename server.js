@@ -57,6 +57,7 @@ const whitelist = [
 	'http://localhost:8080',
 	'http://localhost:5000',
 	'https://www.priorartarchive.org',
+	'https://dev.priorartarchive.org',
 ];
 
 const corsOptions = {

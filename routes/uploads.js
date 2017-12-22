@@ -9,6 +9,14 @@ producer.init().then(()=> {
 	kafkaProducer = producer;
 });
 
+const underlayUrl = process.env.IS_PRODUCTION_API === 'true'
+	? 'https://underlay-api-v1-production.herokuapp.com/assertions'
+	: 'https://underlay-api-v1-dev.herokuapp.com/assertions';
+
+const webhookUrl = process.env.IS_PRODUCTION_API === 'true'
+	? 'https://prior-art-archive-api-prod.herokuapp.com/handleUnderlayResponse'
+	: 'https://prior-art-archive-api-dev.herokuapp.com/handleUnderlayResponse';
+
 app.post('/uploads', (req, res)=> {
 	return Organization.findOne({
 		where: {
@@ -40,11 +48,11 @@ app.post('/uploads', (req, res)=> {
 		}];
 		const options = {
 			method: 'POST',
-			uri: 'https://underlay-api-v1-dev.herokuapp.com/assertions',
+			uri: underlayUrl,
 			body: {
 				authentication: {},
 				assertions: assertions,
-				webhookUri: 'https://prior-art-archive-api-dev.herokuapp.com/handleUnderlayResponse'
+				webhookUri: webhookUrl
 			},
 			json: true
 		};
