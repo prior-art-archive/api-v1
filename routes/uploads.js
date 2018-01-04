@@ -22,7 +22,7 @@ app.post('/uploads', (req, res)=> {
 		where: {
 			slug: req.body.organizationSlug
 		},
-		attributes: ['slug', 'id'],
+		attributes: ['slug', 'id', 'name'],
 	})
 	.then((organizationData)=> {
 		if (!organizationData) { throw new Error('organizationSlug not valid'); }
