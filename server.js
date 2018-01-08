@@ -104,6 +104,7 @@ app.use((err, req, res, next)=> {
 /* ------------------- */
 /* API Endpoints */
 /* ------------------- */
+require('./routes/cpc.js');
 require('./routes/login.js');
 require('./routes/logout.js');
 require('./routes/organizations.js');
