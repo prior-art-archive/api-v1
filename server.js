@@ -94,6 +94,7 @@ app.get('/favicon.ico', (req, res)=> {
 	res.writeHead(200, { 'Content-Type': 'image/x-icon' });
 	res.end();
 });
+app.use('/robots.txt', express.static('static/robots.txt'));
 
 // Handle errors.
 app.use((err, req, res, next)=> {
@@ -104,6 +105,7 @@ app.use((err, req, res, next)=> {
 /* ------------------- */
 /* API Endpoints */
 /* ------------------- */
+
 require('./routes/cpc.js');
 require('./routes/login.js');
 require('./routes/logout.js');

@@ -13,10 +13,11 @@
     "consumer": "nodemon consumerTest.js",
     "lint": "eslint .",
     "test": "echo \"Error: no test specified\" && exit 1",
+    "sitemap": "node initBuildSiteMap.js",
     "start": "nodemon api.js"
   },
   "dependencies": {
-    "aws-sdk": "^2.7.19",
+    "aws-sdk": "^2.182.0",
     "babel-core": "^6.13.2",
     "babel-eslint": "^7.1.0",
     "babel-plugin-add-module-exports": "^0.2.1",
@@ -53,6 +54,7 @@
     "request-promise": "^4.1.1",
     "sequelize": "^4.7.5",
     "throng": "^4.0.0",
+    "tmp-promise": "^1.0.4",
     "uuid": "^3.1.0"
   },
   "engines": {
