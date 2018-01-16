@@ -24,8 +24,7 @@ function uploadLocalFile(filePath) {
 		};
 		return s3bucket.putObject(params).promise();
 	})
-	.then((huh)=> {
-		console.log('huh', huh);
+	.then(()=> {
 		return `https://assets.pubpub.org/${filename}`;
 	})
 	.catch((error)=> {
