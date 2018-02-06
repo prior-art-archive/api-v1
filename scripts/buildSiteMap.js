@@ -58,6 +58,7 @@ Promise.all([findUploads, findOrganizations])
 			companyId: data.companyId,
 			title: data.title,
 			dateUploaded: data.dateUploaded,
+			datePublished: data.datePublished,
 		};
 	}).sort((foo, bar)=> {
 		if (foo.dateUploaded > bar.dateUploaded) { return -1; }
