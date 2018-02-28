@@ -1,2 +1,2 @@
 require('babel-register');
-require('./scripts/sendToKafka.js');
+require('./scripts/sendUniqueToKafka.js');

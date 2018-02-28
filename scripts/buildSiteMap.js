@@ -35,7 +35,8 @@ function uploadLocalFile(filePath) {
 
 const findUploads = Upload.findAll({
 	where: {
-		underlayMetadata: { $ne: null }
+		underlayMetadata: { $ne: null },
+		deleted: { $ne: true },
 	},
 	attributes: ['underlayMetadata'],
 });
