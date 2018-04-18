@@ -48,7 +48,7 @@ app.post('/assets/kafka', (req, res)=> {
 		message: {
 			value: JSON.stringify([req.body])
 		}
-	});
+	})
 	.then(()=> {
 		return res.status(201).json('Sent to Kafka');
 	})
