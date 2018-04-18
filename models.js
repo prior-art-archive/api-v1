@@ -23,20 +23,36 @@ const id = {
 	defaultValue: Sequelize.UUIDV4,
 };
 
-const Upload = sequelize.define('Upload', {
+// const Upload = sequelize.define('Upload', {
+// 	id: id,
+// 	rawMetadata: { type: Sequelize.JSONB },
+// 	formattedMetadata: { type: Sequelize.JSONB },
+// 	underlayMetadata: { type: Sequelize.JSONB },
+// 	organizationId: { type: Sequelize.UUID },
+// 	deleted: { type: Sequelize.BOOLEAN },
+// 	requestId: {
+// 		type: Sequelize.UUID,
+// 		unique: true,
+// 	},
+// });
+
+const Asset = sequelize.define('Asset', {
 	id: id,
-	rawMetadata: { type: Sequelize.JSONB },
-	formattedMetadata: { type: Sequelize.JSONB },
-	underlayMetadata: { type: Sequelize.JSONB },
-	organizationId: { type: Sequelize.UUID },
-	deleted: { type: Sequelize.BOOLEAN },
-	requestId: {
-		type: Sequelize.UUID,
+	url: { type: Sequelize.STRING },
+	originalFilename: { type: Sequelize.STRING },
+	title: { type: Sequelize.STRING },
+	description: { type: Sequelize.STRING },
+	datePublished: { type: Sequelize.STRING },
+	md5Hash: {
+		type: Sequelize.STRING,
+		allowNull: false,
 		unique: true,
 	},
+	/* Set by Associations */
+	companyId: { type: Sequelize.UUID, allowNull: false },
 });
 
-const Organization = sequelize.define('Organization', {
+const Company = sequelize.define('Company', {
 	id: id,
 	slug: {
 		type: Sequelize.STRING,
@@ -66,16 +82,19 @@ const Organization = sequelize.define('Organization', {
 	salt: { type: Sequelize.TEXT, allowNull: false },
 });
 
-passportLocalSequelize.attachToUser(Organization, {
+passportLocalSequelize.attachToUser(Company, {
 	usernameField: 'slug',
 	hashField: 'hash',
 	saltField: 'salt',
-	digest: 'sha1',
 });
 
+/* Companies have many Assets. Recipes belong to a single Community */
+Company.hasMany(Asset, { onDelete: 'CASCADE', as: 'assets', foreignKey: 'companyId' });
+Asset.belongsTo(Company, { onDelete: 'CASCADE', as: 'company', foreignKey: 'companyId' });
+
 const db = {
-	Upload: Upload,
-	Organization: Organization,
+	Asset: Asset,
+	Company: Company,
 };
 
 db.sequelize = sequelize;

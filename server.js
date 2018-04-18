@@ -7,7 +7,7 @@ import cors from 'cors';
 import compression from 'compression';
 import passport from 'passport';
 
-import { sequelize, Organization } from './models';
+import { sequelize, Company } from './models';
 
 /* -------------------------------- */
 /* Initialize development variables */
@@ -79,10 +79,10 @@ app.use(cors(corsOptions));
 /* ------------------- */
 app.use(passport.initialize());
 app.use(passport.session());
-passport.use(Organization.createStrategy());
+passport.use(Company.createStrategy());
 // Use static serialize and deserialize of model for passport session support
-passport.serializeUser(Organization.serializeUser());
-passport.deserializeUser(Organization.deserializeUser());
+passport.serializeUser(Company.serializeUser());
+passport.deserializeUser(Company.deserializeUser());
 /* -------------------- */
 /* -------------------- */
 
@@ -105,13 +105,14 @@ app.use((err, req, res, next)=> {
 /* ------------------- */
 /* API Endpoints */
 /* ------------------- */
-
+require('./routes/assets.js');
+require('./routes/companies.js');
 require('./routes/cpc.js');
 require('./routes/login.js');
 require('./routes/logout.js');
-require('./routes/organizations.js');
+// require('./routes/organizations.js');
 require('./routes/uploadPolicy.js');
-require('./routes/uploads.js');
+// require('./routes/uploads.js');
 
 /* ------------------- */
 /* ------------------- */
