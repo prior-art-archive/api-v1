@@ -1,5 +1,13 @@
+import Kafka from 'no-kafka';
 import app from '../server';
 import { Asset, Company } from '../models';
+
+const producer = new Kafka.Producer();
+let kafkaProducer;
+producer.init().then(()=> {
+	kafkaProducer = producer;
+});
+
 
 app.get('/assets', (req, res)=> {
 	return Asset.findOne({
