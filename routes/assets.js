@@ -32,3 +32,19 @@ app.post('/assets', (req, res)=> {
 		return res.status(500).json(err);
 	});
 });
+
+app.post('/assets/kafka', (req, res)=> {
+	return kafkaProducer.send({
+		topic: 'tennessee-18188.uspto',
+		partition: 0,
+		message: {
+			value: JSON.stringify([req.body])
+		}
+	});
+	.then(()=> {
+		return res.status(201).json('Sent to Kafka');
+	})
+	.catch((err)=> {
+		return res.status(500).json(err);
+	});
+});
