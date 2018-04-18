@@ -29,13 +29,13 @@ producer.init().then(()=> {
 		
 		return Promise.map(uniqueUploadData, (item)=> {
 			const itemJson = item.toJSON();
-			// return kafkaProducer.send({
-			// 	topic: 'tennessee-18188.uspto',
-			// 	partition: 0,
-			// 	message: {
-			// 		value: JSON.stringify([itemJson.underlayMetadata])
-			// 	}
-			// });
+			return kafkaProducer.send({
+				topic: 'tennessee-18188.uspto',
+				partition: 0,
+				message: {
+					value: JSON.stringify([itemJson.underlayMetadata])
+				}
+			});
 		}, { concurrency: 5 });
 	})
 	.then((promiseResults)=> {
