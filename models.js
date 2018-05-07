@@ -38,16 +38,17 @@ const id = {
 
 const Asset = sequelize.define('Asset', {
 	id: id,
-	url: { type: Sequelize.STRING },
-	originalFilename: { type: Sequelize.STRING },
-	title: { type: Sequelize.STRING },
-	description: { type: Sequelize.STRING },
-	datePublished: { type: Sequelize.STRING },
+	url: { type: Sequelize.TEXT },
+	originalFilename: { type: Sequelize.TEXT },
+	title: { type: Sequelize.TEXT },
+	description: { type: Sequelize.TEXT },
+	datePublished: { type: Sequelize.TEXT },
 	md5Hash: {
-		type: Sequelize.STRING,
+		type: Sequelize.TEXT,
 		allowNull: false,
 		unique: true,
 	},
+	sourcePath: { type: Sequelize.TEXT },
 	/* Set by Associations */
 	companyId: { type: Sequelize.UUID, allowNull: false },
 });
@@ -55,7 +56,7 @@ const Asset = sequelize.define('Asset', {
 const Company = sequelize.define('Company', {
 	id: id,
 	slug: {
-		type: Sequelize.STRING,
+		type: Sequelize.TEXT,
 		unique: true,
 		allowNull: false,
 		validate: {

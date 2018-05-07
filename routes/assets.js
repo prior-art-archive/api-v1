@@ -1,6 +1,6 @@
 import Kafka from 'no-kafka';
 import app from '../server';
-import { Asset, Company } from '../models';
+import { Asset } from '../models';
 
 const producer = new Kafka.Producer();
 let kafkaProducer;
@@ -32,6 +32,7 @@ app.post('/assets', (req, res)=> {
 		md5Hash: req.body.md5Hash,
 		datePublished: req.body.datePublished,
 		companyId: req.body.companyId,
+		sourcePath: req.body.sourcePath,
 	})
 	.then((newAsset)=> {
 		return res.status(201).json(newAsset);

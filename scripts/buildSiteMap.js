@@ -2,7 +2,7 @@ import fs from 'fs';
 import tmp from 'tmp-promise';
 import Promise from 'bluebird';
 import AWS from 'aws-sdk';
-import { Upload, Organization } from '../models';
+import { Asset, Company } from '../models';
 
 AWS.config.region = 'us-east-1';
 AWS.config.setPromisesDependency(Promise);
@@ -33,14 +33,14 @@ function uploadLocalFile(filePath) {
 }
 
 
-const findUploads = Upload.findAll({
-	where: {
-		underlayMetadata: { $ne: null },
-		deleted: { $ne: true },
-	},
-	attributes: ['underlayMetadata'],
+const findUploads = Asset.findAll({
+	// where: {
+	// 	underlayMetadata: { $ne: null },
+	// 	deleted: { $ne: true },
+	// },
+	// attributes: ['underlayMetadata'],
 });
-const findOrganizations = Organization.findAll({
+const findOrganizations = Company.findAll({
 	attributes: ['id', 'name']
 });
 
@@ -60,6 +60,7 @@ Promise.all([findUploads, findOrganizations])
 			title: data.title,
 			dateUploaded: data.dateUploaded,
 			datePublished: data.datePublished,
+			sourcePath: data.sourcePath,
 		};
 	}).sort((foo, bar)=> {
 		if (foo.dateUploaded > bar.dateUploaded) { return -1; }
