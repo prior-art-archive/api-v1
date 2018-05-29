@@ -41,7 +41,7 @@ const findUploads = Asset.findAll({
 	// attributes: ['underlayMetadata'],
 });
 const findOrganizations = Company.findAll({
-	attributes: ['id', 'name']
+	attributes: ['id', 'name'],
 });
 
 Promise.all([findUploads, findOrganizations])
@@ -51,16 +51,15 @@ Promise.all([findUploads, findOrganizations])
 		companyIdToName[item.id] = item.name;
 	});
 	const formattedUploadData = uploadData.map((item)=> {
-		const data = item.underlayMetadata;
 		return {
-			url: data.url,
-			fileId: data.fileId,
-			companyName: companyIdToName[data.companyId],
-			companyId: data.companyId,
-			title: data.title,
-			dateUploaded: data.dateUploaded,
-			datePublished: data.datePublished,
-			sourcePath: data.sourcePath,
+			url: item.url,
+			fileId: item.id,
+			companyName: companyIdToName[item.companyId],
+			companyId: item.companyId,
+			title: item.title,
+			dateUploaded: item.dateUploaded,
+			datePublished: item.datePublished,
+			sourcePath: item.sourcePath,
 		};
 	}).sort((foo, bar)=> {
 		if (foo.dateUploaded > bar.dateUploaded) { return -1; }
