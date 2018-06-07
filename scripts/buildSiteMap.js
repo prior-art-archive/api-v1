@@ -53,7 +53,7 @@ Promise.all([findUploads, findOrganizations])
 	const formattedUploadData = uploadData.map((item)=> {
 		return {
 			url: item.url,
-			fileId: item.id,
+			fileId: item.md5Hash,
 			companyName: companyIdToName[item.companyId],
 			companyId: item.companyId,
 			title: item.title,
